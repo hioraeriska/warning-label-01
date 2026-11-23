@@ -4,14 +4,23 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+const MAX_CHARS = 160;
+
 const LINE =
   "WARNING: Opens the fridge, stares inside for 30 seconds, and closes it, having learned nothing.";
 
+function validate(line: string): void {
+  if (line.includes("\n") || line.includes("\r")) {
+    throw new Error("entry must be a single line");
+  }
+  const length = [...line].length;
+  if (length > MAX_CHARS) {
+    throw new Error(`entry is ${length} characters, over the ${MAX_CHARS} limit`);
+  }
+}
+
+validate(LINE);
+
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 mkdirSync(outDir, { recursive: true });
-if ([...LINE].length > 160) {
-  throw new Error(
-    `entry is ${[...LINE].length} characters, over the 160 limit`,
-  );
-}
 writeFileSync(join(outDir, "entry.txt"), LINE, "utf8");
